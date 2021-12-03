@@ -14,6 +14,8 @@ Change "Zero" port to "branch_con"
 
 Will be asserted if condition satisfied
 
+Need to add functions such as to determind if content of read register 1 is >0, <0 or others?
+
 Control
 =======
 
