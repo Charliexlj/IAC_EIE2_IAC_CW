@@ -16,6 +16,8 @@ Will be asserted if condition satisfied
 
 Need to add functions such as to determind if content of read register 1 is >0, <0 or others?
 
+Add another ouput port for HI & LO registers. Probably hi_enable and lo_enable because add/sub & mult/div instructions only differ from the fn code
+
 Control
 =======
 
