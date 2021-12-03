@@ -29,3 +29,12 @@ Register File
 "HI & LO"?
 
 Need to be addressed but not sure how
+
+Others
+======
+
+JR instructions with opcode 000000 need to be different from add/sub/and/or/sll etc.
+
+Either implement in ALU e.g. add another one bit output indicate if we want to jump_reg depending on the fn code (I think make more sense)
+
+OR control add another input of function code to make the jump decision. (this way the additional connection only serve for the JR instruction)
