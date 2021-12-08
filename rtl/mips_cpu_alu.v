@@ -1,88 +1,172 @@
-// AND  | 00001
-// ADD  | 00010
-
-// BEQ  | 00011
-// BGTZ | 00100
-// BGEZ | 00101
-// BLTZ | 00110
-// BLEZ | 00111
-// BNE  | 01000
-
-// DIV  | 01001
-// DIVU | 01010
-// MUL  | 01011
-// MULTU| 01100
-// OR   | 01101
-
-// SLL  | 01111
-// SLT  | 10000
-// SLTU | 10001
-// SRA  | 10011
-// SRL  | 10100
-
-// SUB  | 10101
-// XOR  | 10110
-
-module mips_cpu_alu(
-  input logic[31:0] A,
-	input logic[31:0] B,
-  input logic[4:0] alu_ctrl,
-  output logic[31:0] reg_hi,
-	output logic[31:0] reg_lo, 
-  output logic branch_con
+module mips_cpu_alu (
+    input logic[31:0] data_1,
+    input logic[31:0] data_2,
+    input logic[5:0] fn,
+    input logic[4:0] sa,
+    input logic[3:0] aluop,
+    output logic[31:0] r,
+    output logic[31:0] r_lo,
+    output logic hi_en, lo_en,
+    output logic mfhi, mflo,
+    output logic branch_con,
+    output logic jump_reg,
+    output logic link_reg
 );
-
-  logic[31:0] y, i;
-	logic[63:0] result;
-	logic signed [31:0] signed_a, signed_b;
-	assign signed_a = A;
-	assign signed_b = B;
-	assign reg_lo = result[31:0];
-	assign reg_hi = result[63:32];
-
-  always @(*) begin
-		// $display("%d", result);
-    case (alu_ctrl)
-			1: // AND
-				result <= A & B;
-			2: // ADD
-				result <= A + B;
-			3: // BEQ
-				branch_con <= ( A == B ) ? 1 : 0;
-			4: // BGTZ A > 0 
-				branch_con <= ( (A[31] != 1) && (A != 0) ) ? 1 : 0;	
-			5: // BGEZ A >= 0
-				branch_con <= ( A[31] != 1 ) ? 1 : 0;	
-			6: // BLTZ A < 0
-				branch_con <= ( A[31] == 1 ) ? 1 : 0;	
-			7: // BLEZ A <= 0
-				branch_con <= ( (A[31] == 1) || (A == 0) ) ? 1 : 0;	
-			8: // BNE
-				branch_con <= ( A != 0 ) ? 1 : 0;	
-			9: // DIV
-				result <= signed_a / signed_b;
-			10: // DIVU
-				result <= A / B;
-      11: // MUL
-				result = signed_a * signed_b;
-      12: // MULTU
-				result = A * B;
-			13: // OR
-				result <= A | B;
-			14: // SLL
-				result <= A << (B);	
-			15: // SLT
-				result <= signed_a < signed_b;
-			16: // SLTU
-				result <= A < B;
-			17: //  SRL
-				result <= A >> (B);
-			18: // SRA
-				result <= A >>> (B);
-			19: // SUB
-				result <= A + (~B + 1);
-			20: // XOR
-				result <= A ^ B;
-		endcase
-  end
+    logic[63:0] mult_r_u,mult_r;
+    logic[31:0] remainder_u,div_r_u;
+    logic[31:0] remainder,div_r;
+    always @(*) begin
+        r <= 32'hxxxxxxxx;
+        r_lo <= 32'hxxxxxxxx;
+        mult_r_u <= data_1 * data_2;
+        mult_r <= $signed(data_1) * $signed(data_2);
+        remainder_u <= data_1 % data_2;
+        div_r_u <= data_1 / data_2;
+        remainder <= $signed(data_1) % $signed(data_2);
+        div_r <= $signed(data_1) / $signed(data_2);
+        hi_en <= 0;
+        lo_en <= 0;
+        mfhi <= 0;
+        mflo <= 0;
+        branch_con <= 1'b0;
+        jump_reg <= 1'b0;
+        link_reg <= 1'b0;
+        case (aluop)
+            4'b0000: begin
+                case (fn)
+                    6'b100001: begin // addu
+                        r <= data_1 + data_2;
+                    end 
+                    6'b100100: begin //and
+                        r <= data_1 & data_2;
+                    end
+                    6'b001000: begin
+                        jump_reg <= 1'b1; //jr
+                        r <= data_1 + data_2;
+                    end
+                    6'b001001:begin //jalr;
+                        jump_reg <= 1'b1;
+                        r <= data_1 + data_2;
+                        link_reg <= 1;
+                    end
+                    6'b010001: begin //move to hi
+                        r <= data_1;
+                        hi_en <= 1;
+                    end
+                    6'b010011: begin //move to lo
+                        r_lo <= data_1;
+                        lo_en <= 1;
+                    end
+                    6'b010000: begin //mfhi
+                        mfhi <= 1;
+                    end
+                    6'b010010: begin //mflo
+                        mflo <= 1;
+                    end
+                    6'b011000: begin //mult
+                        r <= mult_r[63:32];
+                        r_lo <= mult_r[31:0];
+                        hi_en <= 1;
+                        lo_en <= 1;
+                    end
+                    6'b011001: begin //multu
+                        r <= mult_r_u[63:32];
+                        r_lo <= mult_r_u[31:0];
+                        hi_en <= 1;
+                        lo_en <= 1;
+                    end
+                    6'b100101: begin //or
+                        r <= data_1 | data_2;
+                    end
+                    6'b000000: begin //sll
+                        r <= data_2 << sa;
+                    end
+                    6'b000100: begin //sllv
+                        r <= data_2 << data_1;
+                    end
+                    6'b000010: begin //sra
+                        r <= data_2 >>> sa;
+                    end
+                    6'b000111: begin //srav
+                        r <= data_2 >>> data_1;
+                    end
+                    6'b000010: begin //srl
+                        r <= data_2 >> sa;
+                    end
+                    6'b000110: begin //srlv
+                        r <= data_2 >> data_1;
+                    end
+                    6'b100011: begin //subu
+                        r <= data_1 - data_2;
+                    end
+                    6'b100110: begin //xor
+                        r <= data_1 ^ data_2;
+                    end
+                    6'b011010: begin //div
+                        r <= remainder;
+                        r_lo <= div_r;
+                        hi_en <= 1;
+                        lo_en <= 1;
+                    end
+                    6'b011011: begin //divu
+                        r <= remainder_u;
+                        r_lo <= div_r_u;
+                        hi_en <= 1;
+                        lo_en <= 1;
+                    end
+                    6'b101010: begin //slt
+                        r <= ($signed(data_1) < $signed(data_2)) ? 1 : 0;
+                    end
+                    6'b101011: begin //sltu
+                        r <= data_1 < data_2 ? 1 : 0;
+                    end
+                endcase
+            end
+            4'b0001: begin//addiu
+                r <= data_1 + data_2;
+            end
+            4'b0010: begin//andi
+                r <= data_1 & data_2;
+            end
+            4'b0011: begin //a=b
+                if (data_1 == data_2) begin
+                    branch_con <= 1;
+                end
+            end
+            4'b0100: begin //a>0
+                if ($signed(data_1) > 0) begin
+                    branch_con <= 1;
+                end
+            end
+            4'b0101: begin //a>=0
+                if ($signed(data_1) >= 0) begin
+                    branch_con <= 1;
+                end
+            end
+            4'b0110: begin //a<0
+                if ($signed(data_1) < 0) begin
+                    branch_con <= 1;
+                end
+            end
+            4'b0111: begin //a<=0
+                if ($signed(data_1) <= 0) begin
+                    branch_con <= 1;
+                end
+            end
+            4'b1000: begin
+                if (data_1 != data_2) begin//bne
+                    branch_con <= 1;
+                end
+            end
+            4'b1001: begin //or
+                r <= data_1 | data_2;
+            end
+            4'b1010: begin //slti
+                r <= ($signed(data_1) < $signed(data_2)) ? 1 : 0;
+            end
+            4'b1011: begin //sltiu
+                r <= data_1 < data_2 ? 1 : 0;
+            end
+        endcase
+    end
 endmodule

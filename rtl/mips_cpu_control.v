@@ -1,6 +1,6 @@
-module control (
+module mips_cpu_control (
     input logic[5:0] opcode,
-    input logic[4:0] branch_type;
+    input logic[4:0] branch_type,
     output logic regdst,
     output logic branch,
     output logic jump,
@@ -10,7 +10,8 @@ module control (
     output logic memwrite,
     output logic alusrc,
     output logic regwrite,
-    output logic link
+    output logic link,
+    output logic signed_data
 );
     /*
     ---
@@ -27,13 +28,13 @@ module control (
         regdst <= 1'b1;//rd[15:11]
         branch <= 1'b0;//no branch
         jump <= 1'b0;//no jump
-        memread <= 1'b0//no need read from data memory
-        memtoreg <= 1'b0//alu_result to register
-        memwrite <= 1'b0//no write to memory
-        alusrc <= 1'b0//data from register
-        regwrite <= 1'b1//write to register
-        link <= 1'b0;//no link
-
+        memread <= 1'b0;//no need read from data memory
+        memtoreg <= 1'b0;//alu_result to register
+        memwrite <= 1'b0;//no write to memory
+        alusrc <= 1'b0;//data from register
+        regwrite <= 1'b1;//write to register
+        link <= 1'b0;
+        signed_data <= 1'b0;
         /*
         other instructions
         i_type/j_type will need aluop
@@ -73,10 +74,14 @@ module control (
         if a < 0                0110
         if a <= 0               0111
         if a != b               1000
+        or                      1001
+        slti                    1010
+        sltiu                   1011
         */
         case (opcode)
             /*↓addiu↓*/
             6'b001001: begin
+                //change back to 0001
                 aluop <= 4'b0001;//unsign addition
                 regdst <= 1'b0;//rd[20:16]
                 alusrc <= 1'b1;//data from instruction
@@ -89,6 +94,7 @@ module control (
                 aluop <= 4'b0010;//and
                 regdst <= 1'b0;//rd[20:16]
                 alusrc <= 1'b1;//data from instruction
+                signed_data <= 1;
             end
 
             /*↓beq↓*/
@@ -96,31 +102,36 @@ module control (
                 aluop <= 4'b0011;//a=b
                 branch <= 1'b1;//if condition satisfied then branch
                 regwrite <= 1'b0;
+                signed_data <= 1;
             end
             
             /*↓bgez&bgezal↓*/
             /*↓bltz&bltzal↓*/
             6'b000001: begin
-                case (branch_type))
+                case (branch_type)
                     5'b00001: begin
                         aluop <= 4'b0101;//a>=0
                         branch <= 1'b1;//if alu return 0 then branch
                         regwrite <= 1'b0;
+                        signed_data <= 1;
                     end
                     5'b10001: begin
                         aluop <= 4'b0101;//a>=0
                         branch <= 1'b1;//if alu return 0 then branch
                         link <= 1'b1;
+                        signed_data <= 1;
                     end
                     5'b00000: begin
-                        aluop <= 4'b0110;//a>=0
+                        aluop <= 4'b0110;//a<0
                         branch <= 1'b1;//if alu return 0 then branch
                         regwrite <= 1'b0;
+                        signed_data <= 1;
                     end
-                    5'b10001: begin
-                        aluop <= 4'b0110;//a>=0
+                    5'b10000: begin
+                        aluop <= 4'b0110;//a<0
                         branch <= 1'b1;//if alu return 0 then branch
                         link <= 1'b1;
+                        signed_data <= 1;
                     end
                 endcase
             end
@@ -144,10 +155,56 @@ module control (
                 aluop <= 4'b1000;//a!=b
                 branch <= 1'b1;//if condition satisfied then branch
                 regwrite <= 1'b0;
+                signed_data <= 1;
             end
 
-            /*↓div↓*/
+            /*↓lw*/
+            6'b100011: begin
+                aluop <= 4'b0001;
+                memread <= 1'b1;
+                memtoreg <= 1'b1;
+                regdst <= 1'b0;//rt[20:16]
+                alusrc <= 1'b1;
+                signed_data <= 1;
+            end
 
+            /*↓sw*/
+            6'b101011: begin
+                aluop <= 4'b0001;
+                memwrite <=1'b1;
+                alusrc <= 1'b1;
+                regwrite <= 1'b0;
+                signed_data <= 1;
+            end
+
+            /*j*/
+            6'b000010: begin
+                jump <= 1'b1;
+                regwrite <= 1'b0;
+            end
+
+            /*jal*/
+            6'b000011: begin
+                jump <= 1;
+                link <= 1;
+            end
+            /*ori*/
+            6'b001101: begin
+                aluop <= 4'b1001;
+                regdst <= 1'b0;//rd[20:16]
+                alusrc <= 1'b1;//data from instruction
+            end
+            6'b001010: begin //slti
+                aluop <= 4'b1010;
+                regdst <= 1'b0;
+                alusrc <= 1'b1;
+                signed_data <= 1;
+            end
+            6'b001011: begin
+                aluop <= 4'b1011;
+                regdst <= 1'b0;
+                alusrc <= 1'b1;
+            end
         endcase
     end
 
