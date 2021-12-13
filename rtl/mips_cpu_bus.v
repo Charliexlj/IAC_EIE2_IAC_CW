@@ -255,8 +255,7 @@ module mips_cpu_bus(
 
     always_ff @(posedge clk or negedge reset) begin
         if(reset == 1) begin
-            //pc <= 32'hbfc00000;
-            pc <= 32'h8;
+            pc <= 32'hbfc00000;
             pc_branch <= 0;
             pc_jump <= 0;
             pc_jump_reg <= 0;

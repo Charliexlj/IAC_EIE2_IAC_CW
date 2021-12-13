@@ -19,8 +19,9 @@ module mips_cpu_bus_tb;
     logic[3:0] byteenable;
     logic waitrequest;
     logic[31:0] check;
-    logic[2:0] state_c;
+    logic[3:0] state_c;
 
+    /*#(RAM_INIT_FILE)*/
     mips_cpu_ram #(RAM_INIT_FILE) ramInst(clk, address, write, read, writedata, readdata, byteenable, waitrequest);
     
     mips_cpu_bus cpuInst(clk, reset, active, register_v0, address, write, read, waitrequest, writedata, byteenable, readdata,check, state_c);
@@ -40,24 +41,24 @@ module mips_cpu_bus_tb;
     end
 
     initial begin
-        rst <= 0;
+        reset <= 0;
 
         @(posedge clk);
-        rst <= 1;
+        reset <= 1;
 
         @(posedge clk);
-        rst <= 0;
+        reset <= 0;
 
         @(posedge clk);
-        assert(running==1)
-        else $display("TB : CPU did not set running=1 after reset.");
+        assert(active==1)
+        else $display("TB : CPU did not set active=1 after reset.");
 
-        while (running) begin
+        while (active) begin
             @(posedge clk);
         end
 
-        $display("TB : finished; running=0");
-
+        $display("TB : finished; active=0");
+        $display("register_v0 = %h",register_v0);
         $finish;
         
     end
