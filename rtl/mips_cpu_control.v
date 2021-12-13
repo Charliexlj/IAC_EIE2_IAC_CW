@@ -11,7 +11,9 @@ module mips_cpu_control (
     output logic alusrc,
     output logic regwrite,
     output logic link,
-    output logic signed_data
+    output logic signed_data,
+    output logic byte_access,
+    output logic signed_byte
 );
     /*
     ---
@@ -35,6 +37,8 @@ module mips_cpu_control (
         regwrite <= 1'b1;//write to register
         link <= 1'b0;
         signed_data <= 1'b0;
+        byte_access <= 1'b0;
+        signed_byte <= 1'b0;
         /*
         other instructions
         i_type/j_type will need aluop
@@ -166,6 +170,76 @@ module mips_cpu_control (
                 regdst <= 1'b0;//rt[20:16]
                 alusrc <= 1'b1;
                 signed_data <= 1;
+            end
+
+            /*lb*/
+            6'b100000: begin
+                aluop <= 4'b0001;
+                memread <= 1'b1;
+                memtoreg <= 1'b1;
+                regdst <= 1'b0;//rt[20:16]
+                alusrc <= 1'b1;
+                signed_data <= 1;
+                byte_access <= 1;
+                signed_byte <= 1;
+            end
+
+            /*lbu*/
+            6'b100100: begin
+                aluop <= 4'b0001;
+                memread <= 1'b1;
+                memtoreg <= 1'b1;
+                regdst <= 1'b0;//rt[20:16]
+                alusrc <= 1'b1;
+                signed_data <= 1;
+                byte_access <= 1;
+            end
+
+            /*lh*/
+            6'b100001: begin
+                aluop <= 4'b0001;
+                memread <= 1'b1;
+                memtoreg <= 1'b1;
+                regdst <= 1'b0;//rt[20:16]
+                alusrc <= 1'b1;
+                signed_data <= 1;
+                byte_access <= 1;
+                signed_byte <= 1;
+            end
+
+            /*lhu*/
+            6'b100101: begin
+                aluop <= 4'b0001;
+                memread <= 1'b1;
+                memtoreg <= 1'b1;
+                regdst <= 1'b0;//rt[20:16]
+                alusrc <= 1'b1;
+                signed_data <= 1;
+                byte_access <= 1;
+            end
+
+            /*sb*/
+            6'b101000: begin
+                aluop <= 4'b0001;
+                memread <= 1'b1;
+                memtoreg <= 1'b1;
+                regdst <= 1'b0;//rt[20:16]
+                alusrc <= 1'b1;
+                signed_data <= 1;
+                byte_access <= 1;
+                signed_byte <= 1;
+            end
+
+            /*sh*/
+            6'b101001: begin
+                aluop <= 4'b0001;
+                memread <= 1'b1;
+                memtoreg <= 1'b1;
+                regdst <= 1'b0;//rt[20:16]
+                alusrc <= 1'b1;
+                signed_data <= 1;
+                byte_access <= 1;
+                signed_byte <= 1;
             end
 
             /*↓sw*/

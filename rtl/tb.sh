@@ -1,1 +1,1 @@
-iverilog -Wall -g 2012 -s tb1 -o tb1 tb1_draft_cpu.v mips_cpu_harvard.v mips_cpu_alu.v mips_cpu_pc.v mips_cpu_regs.v mips_cpu_control.v mips_cpu_hilo.v
+iverilog -Wall -g 2012 -s tb2 -o tb2 tb_bus_draft.v mips_cpu_bus.v mips_cpu_alu.v mips_cpu_regs.v mips_cpu_control.v mips_cpu_hilo.v

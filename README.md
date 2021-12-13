@@ -202,7 +202,7 @@ module mips_cpu_bus(
     output logic[31:0] writedata,
     output logic[3:0] byteenable,
     input logic[31:0] readdata
-);
+); 
 ```
 
 Avalon is a clock synchronous protocol, so `readdata` will not become
