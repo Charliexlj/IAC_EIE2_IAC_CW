@@ -12,12 +12,12 @@ module mips_cpu_bus(
     input logic waitrequest,
     output logic[31:0] writedata,
     output logic[3:0] byteenable,
-    input logic[31:0] readdata,
+    input logic[31:0] readdata
 
-    output logic[31:0] check,
-    output logic[3:0] state_c
+    //output logic[31:0] check,
+    //output logic[3:0] state_c
 );
-    assign state_c = state;
+    //assign state_c = state;
     /*
     always_ff @(posedge clk) begin
         if (reset) then begin
@@ -183,7 +183,7 @@ module mips_cpu_bus(
     assign sa = instr[10:6];
     assign alu_aluop = ctrl_aluop;
 
-    assign check = {31'b0,write_en};
+    //assign check = {31'b0,write_en};
 
     //assign data_address = r;
 
