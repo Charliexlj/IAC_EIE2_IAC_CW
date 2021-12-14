@@ -17,7 +17,7 @@ RESULT=$?
 set -e
 
 if [[ "${RESULT}" -ne 0 ]] ; then
-   echo "  ${TESTCASE}  FAIL"
+   echo   ${TESTCASE}  $'\t' Fail
    exit
 fi
 
@@ -37,8 +37,10 @@ diff -w test/reference/${TESTCASE}.out test/output/${TESTCASE}.out
 RESULT=$?
 set -e
 
+FN=$(echo ${TESTCASE}| cut -d'_' -f 1)
+
 if [[ "${RESULT}" -ne 0 ]] ; then
-   echo "  ${TESTCASE}  FAIL"
+   echo   ${TESTCASE}  $'\t' ${FN} $'\t' Fail
 else
-   echo "  ${TESTCASE}  PASS"
+   echo   ${TESTCASE}  $'\t' ${FN} $'\t' Pass
 fi

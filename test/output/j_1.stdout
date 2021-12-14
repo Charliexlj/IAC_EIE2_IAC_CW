@@ -1,0 +1,4 @@
+RAM : INIT : Loading RAM contents from test/hex/j_1.hex.txt
+TB : finished; active=0
+register_v0 = aaaaaaaa
+rtl/mips_cpu_bus_tb.v:62: $finish called at 29000 (10ps)
