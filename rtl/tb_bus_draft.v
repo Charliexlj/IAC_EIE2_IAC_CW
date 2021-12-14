@@ -57,6 +57,7 @@ module tb2 (
         $display("byteenable = %b",byteenable);
         #1
         $display("address = %h",address);
+        $display("check = %h",check);
         $display("");
 
         @(posedge clk);
@@ -65,7 +66,7 @@ module tb2 (
         $display("write = %d",write);
         $display("byteenable = %b",byteenable);
         $display("readdata");
-        readdata = 32'b00100100100000010000000000100000;
+        readdata = 32'hac010008;
         //reg1 = reg4 + h20 = h0 + h20 = h20
         //$display("check = %h",check);
         #1
@@ -83,6 +84,7 @@ module tb2 (
         $display("register_v0 = %h",register_v0);
         $display("address = %h",address);
         $display("check = %h",check);
+        $display("writedata = %h",writedata);
         $display("");
 
 

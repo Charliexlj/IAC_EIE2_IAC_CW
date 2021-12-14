@@ -253,12 +253,14 @@ module mips_cpu_control (
 
             /*j*/
             6'b000010: begin
+                aluop <= 4'b1100;
                 jump <= 1'b1;
                 regwrite <= 1'b0;
             end
 
             /*jal*/
             6'b000011: begin
+                aluop <= 4'b1100;
                 jump <= 1;
                 link <= 1;
             end

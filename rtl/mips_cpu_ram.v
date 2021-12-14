@@ -17,11 +17,11 @@ module mips_cpu_ram(
 
     logic[31:0] mapped_address;
     always @(*) begin
-        case (address[31:24])
-            8'hbf: begin
+        case (address[31:28])
+            4'hb: begin
                 mapped_address <= {1'b1,address[6:0]};
             end
-            8'h00: begin
+            4'h0: begin
                 mapped_address <= {1'b0,address[6:0]};
             end
             default: begin

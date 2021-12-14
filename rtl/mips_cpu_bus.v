@@ -183,7 +183,7 @@ module mips_cpu_bus(
     assign sa = instr[10:6];
     assign alu_aluop = ctrl_aluop;
 
-    assign check = {28'h0,byteenable};
+    assign check = {31'b0,write_en};
 
     //assign data_address = r;
 
@@ -223,9 +223,10 @@ module mips_cpu_bus(
     logic[31:0] i_instr_addr_se;
     assign i_instr_addr_se = {16'b0,i_instr_addr};
 
+    /*
     always @(state == DECODE) begin
         //instr <= readdata;
-        write_en <= (instr[31:26] == 6'b000000 && instr[5:0] == 6'b001000 )? 0 : regwrite;
+        //write_en <= (instr[31:26] == 6'b000000 && instr[5:0] == 6'b001000 )? 0 : regwrite;
         hilo_hi_en <= alu_hi_en;
         hilo_lo_en <= alu_lo_en;
         //pc_jump <= ctrl_jump;
@@ -233,6 +234,11 @@ module mips_cpu_bus(
         //pc_branch_con <= alu_branch_con;
         //pc_jump_reg <= alu_jump_reg;
     end
+    */
+
+    assign write_en = (instr[31:26] == 6'b000000 && instr[5:0] == 6'b001000 )? 0 : regwrite;
+    assign hilo_hi_en = alu_hi_en;
+    assign hilo_lo_en = alu_lo_en;
 
     always @(*)begin
         pc_next <=  (reset == 1) ? 32'hbfc00000 :

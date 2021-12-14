@@ -167,6 +167,9 @@ module mips_cpu_alu (
             4'b1011: begin //sltiu
                 r <= data_1 < data_2 ? 1 : 0;
             end
+            4'b1100:begin //nth
+                r <= 32'b0;
+            end
         endcase
     end
 endmodule
